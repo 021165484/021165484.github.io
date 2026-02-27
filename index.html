@@ -3,132 +3,137 @@
 <head>
 <meta charset="UTF-8">
 <title>Taurus</title>
-
 <style>
-body {
-    margin: 0;
-    background: black;
-    color: white;
-    font-family: Arial, sans-serif;
-    text-align: center;
-    overflow: hidden;
+body{
+    margin:0;
+    background:black;
+    overflow:hidden;
+    text-align:center;
+    color:white;
+    font-family:Arial;
 }
 
-/* 粒子背景 */
-canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 0;
+h1{
+    position:absolute;
+    top:40px;
+    width:100%;
+    letter-spacing:6px;
+    font-size:50px;
 }
 
-/* 內容 */
-.container {
-    position: relative;
-    z-index: 1;
-    margin-top: 80px;
+button{
+    position:absolute;
+    bottom:60px;
+    left:50%;
+    transform:translateX(-50%);
+    padding:15px 40px;
+    font-size:18px;
+    border:none;
+    border-radius:30px;
+    cursor:pointer;
+    background:white;
+    color:black;
 }
 
-h1 {
-    font-size: 60px;
-    letter-spacing: 6px;
-}
-
-/* 圖片外框（正方形容器） */
-.logo-box {
-    width: 280px;
-    height: 280px;
-    margin: 40px auto;
-    border-radius: 40px;
-    overflow: hidden;
-    box-shadow: 0 0 40px rgba(255,255,255,0.4);
-}
-
-/* 圖片本身 */
-.logo-box img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover; /* 重要：裁切不變形 */
-}
-
-/* 按鈕 */
-button {
-    padding: 18px 50px;
-    font-size: 20px;
-    background: white;
-    color: black;
-    border: none;
-    border-radius: 40px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-button:hover {
-    background: #ccc;
-    transform: scale(1.08);
+canvas{
+    display:block;
 }
 </style>
 </head>
 
 <body>
 
-<canvas id="particles"></canvas>
-
-<div class="container">
-    <h1>Taurus</h1>
-
-    <div class="logo-box">
-        <img src="taurus.png">
-    </div>
-
-    <button onclick="window.location.href='https://google.com'">
-        Enter
-    </button>
-</div>
+<h1>Taurus</h1>
+<button onclick="window.location.href='https://google.com'">Enter</button>
+<canvas id="canvas"></canvas>
 
 <script>
-const canvas = document.getElementById("particles");
+const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-let particles = [];
+const mouse = {x:null,y:null};
 
-for (let i = 0; i < 100; i++) {
-    particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        size: Math.random() * 2,
-        speedY: Math.random() * 0.4
-    });
+window.addEventListener("mousemove", e=>{
+    mouse.x = e.x;
+    mouse.y = e.y;
+});
+
+class Particle{
+    constructor(x,y){
+        this.x = Math.random()*canvas.width;
+        this.y = Math.random()*canvas.height;
+        this.baseX = x;
+        this.baseY = y;
+        this.size = 2;
+        this.density = Math.random()*30+1;
+    }
+
+    draw(){
+        ctx.fillStyle="white";
+        ctx.beginPath();
+        ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+        ctx.fill();
+    }
+
+    update(){
+        let dx = mouse.x - this.x;
+        let dy = mouse.y - this.y;
+        let distance = Math.sqrt(dx*dx+dy*dy);
+        let forceDirectionX = dx/distance;
+        let forceDirectionY = dy/distance;
+        let maxDistance = 80;
+        let force = (maxDistance-distance)/maxDistance;
+
+        if(distance < maxDistance){
+            this.x -= forceDirectionX * force * this.density;
+            this.y -= forceDirectionY * force * this.density;
+        }else{
+            this.x += (this.baseX - this.x)/10;
+            this.y += (this.baseY - this.y)/10;
+        }
+    }
 }
 
-function animate() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+let particleArray = [];
 
-    ctx.fillStyle = "rgba(255,255,255,0.4)";
-    particles.forEach(p => {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
+const image = new Image();
+image.src = "taurus.png";
 
-        p.y += p.speedY;
-        if (p.y > canvas.height) {
-            p.y = 0;
-            p.x = Math.random() * canvas.width;
+image.onload = function(){
+    const imageWidth = 300;
+    const imageHeight = 300;
+    const centerX = canvas.width/2 - imageWidth/2;
+    const centerY = canvas.height/2 - imageHeight/2;
+
+    ctx.drawImage(image, centerX, centerY, imageWidth, imageHeight);
+    const imageData = ctx.getImageData(centerX, centerY, imageWidth, imageHeight);
+
+    for(let y=0;y<imageHeight;y+=4){
+        for(let x=0;x<imageWidth;x+=4){
+            const index = (y*imageWidth + x)*4;
+            if(imageData.data[index+3] > 128){
+                particleArray.push(
+                    new Particle(centerX+x, centerY+y)
+                );
+            }
         }
-    });
+    }
 
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    animate();
+};
+
+function animate(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    for(let i=0;i<particleArray.length;i++){
+        particleArray[i].draw();
+        particleArray[i].update();
+    }
     requestAnimationFrame(animate);
 }
-
-animate();
-
-window.addEventListener("resize", () => {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-});
 </script>
 
 </body>
