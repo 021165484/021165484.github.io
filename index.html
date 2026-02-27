@@ -40,6 +40,13 @@
       font-size: clamp(32px, 6vw, 64px);
       letter-spacing: .08em;
       text-transform: uppercase;
+      background: linear-gradient(135deg, #1d4ed8 0%, #5b21b6 50%, #0f766e 100%);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: textGradient 12s ease infinite;
+      text-shadow: 0 2px 18px rgba(16,185,129,.12);
     }
     button {
       appearance: none;
@@ -66,6 +73,11 @@
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
+    @keyframes textGradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
   </style>
 </head>
 <body>
@@ -73,7 +85,7 @@
   <canvas id="taurus"></canvas>
   <div class="ui">
     <h1>Taurus</h1>
-    <button id="go">前往</button>
+    <button id="go">Taurus使你生活更沒好</button>
   </div>
   <script>
     const TARGET_URL = "https://www.example.com";
