@@ -1,32 +1,129 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>我的第一個網站</title>
-  <style>
-    body {
-      background: linear-gradient(to right, #667eea, #764ba2);
-      color: white;
-      text-align: center;
-      font-family: Arial;
-      margin-top: 100px;
-    }
-    h1 {
-      font-size: 50px;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 20px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Taurus</title>
+
+<style>
+body {
+    margin: 0;
+    background: black;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    overflow: hidden;
+}
+
+/* 粒子畫布 */
+canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 0;
+}
+
+/* 內容區 */
+.container {
+    position: relative;
+    z-index: 1;
+    margin-top: 80px;
+}
+
+h1 {
+    font-size: 60px;
+    letter-spacing: 5px;
+}
+
+/* 圖片設定 */
+.logo {
+    width: 250px;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 30px; /* 圓角 */
+    margin: 30px 0;
+    box-shadow: 0 0 40px rgba(255,255,255,0.3);
+}
+
+/* 按鈕 */
+button {
+    padding: 15px 40px;
+    font-size: 18px;
+    background: white;
+    color: black;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #ccc;
+    transform: scale(1.05);
+}
+</style>
 </head>
+
 <body>
 
-<h1>🎉 我的網站成功了！</h1>
-<p>這是我用 GitHub Pages 做的網站</p>
-<button onclick="alert('你按了按鈕！')">點我</button>
+<canvas id="particles"></canvas>
+
+<div class="container">
+    <h1>Taurus</h1>
+
+    <!-- 把圖片檔名改成你的圖片名稱 -->
+    <img src="taurus.png" class="logo">
+
+    <!-- 改成你要前往的網址 -->
+    <br>
+    <button onclick="window.location.href='https://google.com'">
+        Enter
+    </button>
+</div>
+
+<script>
+const canvas = document.getElementById("particles");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+
+for (let i = 0; i < 120; i++) {
+    particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * 2,
+        speedY: Math.random() * 0.5
+    });
+}
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = "rgba(255,255,255,0.5)";
+    particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        p.y += p.speedY;
+        if (p.y > canvas.height) {
+            p.y = 0;
+            p.x = Math.random() * canvas.width;
+        }
+    });
+
+    requestAnimationFrame(animate);
+}
+
+animate();
+
+window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+});
+</script>
 
 </body>
 </html>
